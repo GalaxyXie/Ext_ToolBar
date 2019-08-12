@@ -69,7 +69,7 @@
         });
 
 
-        var win = new Ext.Window({
+        const win = new Ext.Window({
             title: '添加表格',
             width: 400,
             height: 200,
@@ -84,14 +84,14 @@
                         console.log(row, col)
                         data = fillArray(row, col)
                         tpl.overwrite(tabelPanel.body, data);
-                        win.close()
+                        win.hide();
                     }
                 }
             }, {
                 text: '取消',
                 listeners: {
                     'click': function (e) {
-                        win.close()
+                        win.hide();
                     }
                 }
             }]
@@ -145,15 +145,18 @@
                     xtype: 'textarea',
                     width: 400,
                     height: 400,
+                    enableKeyEvents: true,
                     listeners : {
                         keyup : function(field, e){
-                            Ext.getCmp('sendButtons').setDisabled(Ext.isEmpty(Ext.getCmp('replyText').getValue()))
+                            var editable=new Ext.isEmpty(field.getValue())
+                            Ext.getCmp('sendButtons').setDisabled(editable)
                         }
                     }
                 }, tabelPanel],
             buttons: [
                 {
                     id: 'sendButtons',
+                    disabled:true,
                     text: '發送', listeners: {
 
                         'click': function () {
