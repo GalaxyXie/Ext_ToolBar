@@ -1,0 +1,190 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Reply</title>
+    <link rel="stylesheet" type="text/css" href="../../resources/css/ext-all.css"/>
+    <!-- LIBS -->
+    <script type="text/javascript" src="../../adapter/ext/ext-base.js"></script>
+    <!-- ENDLIBS -->
+    <script type="text/javascript" src="../../ext-all.js"></script>
+</head>
+<body>
+<script>
+    Ext.onReady(function () {
+        function fillArray(row, col) {
+            let resultArray = []
+            let count = 1
+            for (let i = 0; i < row; i ++) {
+                resultArray[i]=[]
+                for (let j = 0; j < col; j ++) {
+                    resultArray[i][j] = count
+                    count ++
+                }
+            }
+            return resultArray
+        }
+        var data = []
+        var tpl = new Ext.XTemplate(
+            '<table>',
+            '<tpl for="values">',
+            '<tr>',
+            '<tpl for="values">',
+            '<td> {.} </td>',
+            '</tpl>',
+            '</tr>',
+            '</tpl>',
+            '</table>'
+        );
+        var EditMenu = new Ext.menu.Menu({
+            items: [{
+                text: 'Reset',
+                listeners: {
+                    'click': function () {
+                        Ext.getCmp('replyText').reset()
+                    }
+                }
+            }],
+        });
+
+        var panel = new Ext.form.FormPanel({
+            items: [{
+                id: 'tableRow',
+                fieldLabel: '表格行數',
+                name: 'tableRow',
+                allowBlank: false,
+                xtype: 'textfield',
+                regex: /^\d/,
+            }, {
+                id: 'tableCol',
+                fieldLabel: '表格列數',
+                name: 'tableCol',
+                allowBlank: false,
+                xtype: 'textfield',
+            }],
+        });
+        var tabelPanel = new Ext.Panel({
+            id: 'tabelPanel',
+
+        });
+
+
+        var win = new Ext.Window({
+            title: '添加表格',
+            width: 400,
+            height: 200,
+            layout: 'fit',
+            items: [panel],
+            buttons: [{
+                text: '確定',
+                listeners: {
+                    'click': function (e) {
+                        var row = Ext.get('tableRow').dom.value
+                        var col = Ext.get('tableCol').dom.value
+                        console.log(row, col)
+                        data = fillArray(row, col)
+                        tpl.overwrite(tabelPanel.body, data);
+                        win.close()
+                    }
+                }
+            }, {
+                text: '取消',
+                listeners: {
+                    'click': function (e) {
+                        win.close()
+                    }
+                }
+            }]
+        })
+        var InsertMenu = new Ext.menu.Menu({
+            items: [{
+                text: 'Table',
+                listeners: {
+                    'click': function () {
+                        win.show()
+                    }
+                }
+            }],
+        });
+        var contextmenu = new Ext.menu.Menu({
+            items: [{
+                text: 'Edit',
+                menu: EditMenu
+            },
+                {
+                    text: 'Insert',
+                    menu: InsertMenu,
+                }
+            ],
+        });
+        Ext.get(document).on('contextmenu', function (e) {
+            e.preventDefault();
+            contextmenu.showAt(e.getXY());
+        });
+        var toolbar = new Ext.Toolbar({
+            items: [{
+                text: 'Edit',
+                menu: EditMenu
+            },
+                {
+                    text: 'Insert',
+                    menu: InsertMenu,
+                }
+            ],
+
+        });
+        var replyPanel = new Ext.Panel({
+            renderTo: 'test',
+            tbar: toolbar,
+            items: [
+                {
+                    id: 'replyText',
+                    fieldLabel: '回復',
+                    name: 'node',
+                    allowBlank: false,
+                    xtype: 'textarea',
+                    width: 400,
+                    height: 400,
+                    listeners : {
+                        keyup : function(field, e){
+                            Ext.getCmp('sendButtons').setDisabled(Ext.isEmpty(Ext.getCmp('replyText').getValue()))
+                        }
+                    }
+                }, tabelPanel],
+            buttons: [
+                {
+                    id: 'sendButtons',
+                    text: '發送', listeners: {
+
+                        'click': function () {
+                            Ext.MessageBox.progress("请等待", "数据处理进度...");
+                            var fun = function (p) {
+                                return function () {
+                                    if (p == 3) {
+                                        Ext.MessageBox.hide();
+                                    } else {
+                                        Ext.MessageBox.updateProgress(p / 3);
+                                    }
+                                };
+                            }
+                            for (var i = 1; i <= 3; i++) {
+                                setTimeout(fun(i), i * 1000);
+                            }
+                            var task = new Ext.util.DelayedTask(function () {
+
+                                Ext.MessageBox.alert("success", "發送成功");
+                            });
+                            task.delay(3000);
+                        }
+
+                    }
+                }
+            ],
+
+
+        })
+    })
+</script>
+<div id="test"></div>
+</body>
+</html>
